@@ -1,0 +1,43 @@
+# With hashing
+my @alpha = ("A".."Z", "a".."z"); 
+my %data;   
+my $start = time;   
+for( $k = 0; $k <200; $k = $k + 1 ){ 
+    my $name;   
+    my $age;    
+    $name .= $alpha[rand @alpha] for 1..3; 
+    $age = int(rand(100));   
+    $data{$name} = $age;    
+}
+
+my $time_required = time - $start;  
+print "Execution time(with hashing): $time_required s\n"; 
+
+# Without hashing
+
+my @alpha = ("A".."Z", "a".."z"); 
+my @data;   
+my $start = time;    
+for( $m = 0; $m < 200; $m = $m + 1 ){ 
+    my $name;   
+    my $age;    
+    $name .= $alpha[rand @alpha] for 1..3; 
+    $age = int(rand(100));   
+    $repeat = 0;   
+    for($i = 0; $i < length $m; $i = $i + 1){
+        if($data[$i][0] == $name){   
+            $repeat = 1;   
+            break;
+        }
+    }
+    #if duplicate name is not found
+    if($repeat == 0){ 
+        $data[$m][0] = $name;   
+        $data[$m][1] = $age;    
+    }else{ 
+        $m = $m - 1;
+    }
+}
+
+my $time_required = time - $start;   
+print "Execution time(without hashing): $time_required s\n"; 
