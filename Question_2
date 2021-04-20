@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <time.h>
+
+int main(){
+  clock_t start, end;
+  double cpu_time_usage;
+  //CPU time start.
+  start = clock();
+  for (int i = 0; i < 10000; i++){
+    func_with_subscript();
+  }
+  // CPU time ends.
+  end = clock();
+
+  // CPU time elapsed in the subscript reference.
+  cpu_time_usage = ((double)(end - start)) / CLOCKS_PER_SEC;
+  printf("Time taken using subscript references: %f seconds \n", cpu_time_usage);
+  /*********************************************************************************/
+  // CPU time start.
+  start = clock();
+  for (int i = 0; i < 10000; i++){
+    func_with_pointers();
+  }
+  // CPU time ends.
+  end = clock();
+  // CPU time elapsed in array reference through pointers.
+  cpu_time_usage = ((double)(end - start)) / CLOCKS_PER_SEC;
+  printf("Time taken using pointers: %f seconds \n", cpu_time_usage);
+  return 0;
+}
+
+// function referencing to the 2D array through subscripts.
+void func_with_subscript(){         
+  int arr[15][5] = {0}; 
+
+  for (int i = 0; i < 5; i++){
+    for (int j = 0; j < 15; j++){
+      arr[i][j]; 
+    }
+  }
+  return;
