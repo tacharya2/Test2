@@ -1,482 +1,416 @@
-/* front.c - a lexical analyzer system that covers those criterias of question 1*/
- 
-#include <stdio.h>
-#include <ctype.h>
+import java.io.*;
+import java.util.Scanner;
 
-/* Global declarations */
-/* Variables */
-int charClass;
-char lexeme[100];
-char nextChar;
-int lexLen;
-int token;
-int nextToken;
-FILE *in_fp;
+public class RDA {
 
-/* Function declarations */
-int lookup(char ch);
-void addChar(void);
-void getChar(void);
-void getNonBlank(void);
-int lex(void);
-
-/* Character classes */
-#define CHAR 0
-#define INTEGER 1
-#define FLOAT 2
-#define BOOL 3
-#define STRING 4
-#define DOUBLE 5
-#define ARRAY 6
-#define HASH 7
-#define MAP 8
-#define OCTAL 8
-#define UNKNOWN 99
-
-/* Token codes */
-#define INT_LIT 10
-#define IDENT 11
-
-//MATHEMEATICAL OPERATOR
-#define ASSIGN_OP 20
-#define ADD_OP 21
-#define SUB_OP 22
-#define MULT_OP 23
-#define DIV_OP 24
-#define LEFT_PAREN 25
-#define RIGHT_PAREN 26
-
-#define DECIMAL_FLOAT_LIT 27
-// #define HEX_FLOAT_LIT 28
-#define DECIMAL_DIGITS 29
-#define DECIMAL_EXPONENT 30
-#define DEC_MANTISSA 31
-#define LOGIC_AND 32
-
-//BRACKETS
-#define LEFT_BRACKET 33
-#define RIGHT_BRACKET 34
-#define LOGIC_OR 35
-
-//  PERL STYLE IDENTIFIER
-#define AT_THE_RATE_OP 36 // for @
-#define MODULO_OP 37      // for % operator
-#define DOLLAR_OP 38      // for $ operator
-#define UNDERSCORE 39     // _ for private variable identifier
-
-#define DOT_OP 40     // . operator for mantessa
-#define SINGLE_QUOTE 41     // ' for CHARACTER literals
-#define DOUBLE_QUOTE 42     // " for JAVA-type string
-
-#define LOGIC_NOT 43     // " for !
-
-/******************************************************/
-/* main driver */
-int main(void)
-{
-  /* Open the input data file and process its contents */
-  if ((in_fp = fopen("front.in", "r")) == NULL)
-    printf("ERROR - cannot open front.in \n");
-  else
-  {
-    getChar();
-    do
-    {
-      lex();
-    } while (nextToken != EOF);
+  String myString;
+  int index = 0;
+  int errorFlag = 0;
+  private char token() {
+    return (myString.charAt(index));
   }
-  return 0;
-}
 
-/******************************************************/
-/* lookup - a function to look up operators and
- parentheses and return the token */
-int lookup(char ch)
-{
-  switch (ch)
-  {
-  case '(':
-    addChar();
-    nextToken = LEFT_PAREN;
-    break;
+  /***************************************************************************** */
 
-  case ')':
-    addChar();
-    nextToken = RIGHT_PAREN;
-    break;
-
-  case '+':
-    addChar();
-    nextToken = ADD_OP;
-    break;
-
-  case '-':
-    addChar();
-    nextToken = SUB_OP;
-    break;
-
-  case '*':
-    addChar();
-    nextToken = MULT_OP;
-    break;
-
-  case '/':
-    addChar();
-    nextToken = DIV_OP;
-    break;
-
-  case '[':
-    addChar();
-    nextToken = LEFT_BRACKET;
-    break;
-
-  case ']':
-    addChar();
-    nextToken = RIGHT_BRACKET;
-    break;
-
-  case '|':
-    addChar();
-    nextToken = LOGIC_OR;
-    break;
-
-  case '&':
-    addChar();
-    nextToken = LOGIC_AND;
-    break;
-
-  case '@':
-    addChar();
-    nextToken = AT_THE_RATE_OP;
-    break;
-
-  case '%':
-    addChar();
-    nextToken = MODULO_OP;
-    break;
-
-  case '$':
-    addChar();
-    nextToken = DOLLAR_OP;
-    break;
-
-  case '_':
-    addChar();
-    nextToken = UNDERSCORE;
-    break;
-
-  case '.':
-    addChar();
-    nextToken = DOT_OP;// for decimal numbers
-    break;
-
-  case '\'':
-    addChar();
-    nextToken = SINGLE_QUOTE;
-    break;
-
-  case '"':
-    addChar();
-    nextToken = DOUBLE_QUOTE;
-    break;
-
-  case '!':
-    addChar();
-    nextToken = LOGIC_NOT;
-    break;
-
-  case '=':
-    addChar();
-    nextToken = ASSIGN_OP;
-    break;
-
-  case '{0-9}':
-    addChar();
-    nextToken = INT_LIT;
-    break;
-
-  case '{a-zA-Z}':
-    addChar();
-    nextToken = CHAR;
-    break;
-
-  default:
-    addChar();
-    nextToken = EOF;
-    break;
+  private void pointer() {
+    if (index < (myString.length() - 1))
+      index++;
   }
-  return nextToken;
-}
+  
+  /********************************************************************************** */
 
-/******************************************************/
-/* addChar - a function to add nextChar to lexeme */
-void addChar(void)
-{
-  if (lexLen <= 98)
-  {
-    lexeme[lexLen++] = nextChar;
-    lexeme[lexLen] = '\0';
+  private void matching(char T) {
+    if (T == token())
+      pointer(); // else error();
   }
-  else
-    printf("Error - lexeme is too long \n");
-}
+  
+  /****************************************************************************************** */
 
-/******************************************************/
-/* getChar - a function to get the next character of
- input and determine its character class */
+  private void error(String S) {
+    System.out.println("error at position: " + index);
+    System.out.println("\n" + S);
+    errorFlag = 1;
+    pointer();
+  }
 
-void getChar(void)
-{
-  if ((nextChar = getc(in_fp)) != EOF)
-  {
-    if (isalpha(nextChar)){
-      charClass = CHAR;
-    }
+  /****************************************************************************************** */
 
-    else if (isdigit(nextChar)){
-      charClass = INTEGER;
+  private void program(){
+    if (token() == 'P') {
+      matching(token());
+      if (token() == 'X' || token() == 'Y' || token() == 'Z'){
+        while (token() == 'X' || token() == 'Y' || token() == 'Z')
+        declare();
+      }
     }
-
-    else if (isFloat(nextChar)){ // float identifier. 
-      charClass = FLOAT;
-    }
-
-    else if (isDouble(nextChar)){ // double identifier. 
-      charClass = DOUBLE;
-    }
-    
-    else if (isString(nextChar)){ // string identifier.
-      charClass = STRING;
-    }
-    
-    else if (isBool(nextChar)){ // boolean identifier. 
-      charClass = BOOL;
-    }
-    
-    else if (isArray(nextChar)){ // double identifier. 
-      charClass = ARRAY;
-    }
-    
-    else if (isHash(nextChar)){ // hash identifier. 
-      charClass = HASH;
-    }
-    
-    else if (isMap(nextChar)){ // map identifier. 
-      charClass = MAP;
-    }
-    
-    else if (isOctal(nextChar)){ // octal identifier. 
-      charClass = MAP;
-    }
-
     else
-      charClass = UNKNOWN;
+      error("Expecting P");
+    if (token() == 'B'){
+      matching(token());
+      if (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == 'I' || token() == 'W' || token() == 'R'|| token() == 'O') {
+
+        while (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == 'I' || token() == 'W' || token() == 'R'|| token() == 'O')
+          statement();
+      }
+    }
+    else
+      error("Expecting B");
+    if (token() == 'E')
+      matching('E');
+    else
+      error("Expecting E");
+    if (token() == ';')
+      matching(';');
+    else
+      error("Expecting ;");
   }
+  
+  /****************************************************************************************************** */
+
+  private void declare(){
+    if (token() == 'X' || token() == 'Y' || token() == 'Z')
+      identifier();
+    else
+      error("Expecting identifier(X|Y|Z)");
+    if (token() == ','){
+      while (token() == ','){
+        matching(token());
+        if (token() == 'X' || token() == 'Y' || token() == 'Z')
+          identifier();
+        else
+          error("Expecting identifier(X|Y|Z)");
+      }
+    }
+    if (token() == ':')
+      matching(':');
+    else
+      error("Expecting : ");
+    if (token() == 'V')
+      matching('V');
+    else
+      error("Expecting V ");
+    if (token() == ';')
+      matching(';');
+    else
+      error("Expecting ; ");
+  }
+
+  /****************************************************************************/
+
+  private void statement() {
+    // statement ::= assignment | ifstmt | loop | read | output
+    if (token() == 'X' || token() == 'Y' || token() == 'Z')
+      assignment();
+    else if (token() == 'I')
+      ifstmt();
+    else if (token() == 'W')
+      loop();
+    else if (token() == 'R')
+      read();
+    else if (token() == 'O')
+      output();
+    else
+      error("Not a valid statement type");
+  }
+  
+  /********************************************************************************** */
+
+  private void assignment(){
+    // identifier~expression;
+    if ((token() == 'X') || (token() == 'Y') || (token() == 'Z'))
+      identifier();
+    else
+      error("Expecting identifier(X|Y|Z)");
+    if (token() == '~')
+      matching(token());
+    else
+      error("Expecting ~ ");
+    if ((token() == 'X') || (token() == 'Y') || (token() == 'Z') ||(token() == '0') || (token() == '1') || (token() == '('))
+      expression();
+    else
+      error("Expecting expression( X|Y|Z|0|1|( )");
+    if (token() == ';')
+      matching(token());
+    else
+      error("Expecting ; ");
+  }
+
+  /************************************** if Statement ***************************************** */
+
+  private void ifstmt() {
+    // I comparison @ {statement} [% {statement}] &
+    if (token() == 'I')
+      matching(token());
+    else
+      error("Expecting I ");
+    if (token() == '(') {
+      matching(token());
+      comparison();
+    } else
+      error("Expecting ( ");
+    if (token() == '@')
+      matching(token());
+    else
+      error("Expecting @ ");
+    if (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == 'I' || token() == 'W' || token() == 'R'
+        || token() == 'O') {
+      while (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == 'I' || token() == 'W' || token() == 'R'
+          || token() == 'O')
+        statement();
+    } else
+      error("Not a valid statement type");
+    if (token() == '%')
+      matching(token());
+    if (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == 'I' || token() == 'W' || token() == 'R'
+        || token() == 'O') {
+      while (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == 'I' || token() == 'W' || token() == 'R'
+          || token() == 'O')
+        statement();
+    }
+    if (token() == '&')
+      matching(token());
+    else
+      error("Expecting & ");
+  }
+
+  /***************************** While/for statement************************************* */
+
+  private void loop(){
+    // W comparison L {statement} T
+    if (token() == 'W')
+      matching(token());
+    else
+      error("Expecting w ");
+    if (token() == '('){
+      matching(token());
+      comparison();
+    }
+    else
+      error("Expecting ( ");
+    if (token() == 'L')
+      matching(token());
+    else
+      error("Expecting L ");
+
+    if (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == 'I' || token() == 'W' || token() == 'R' || token() == 'O')
+    {
+      while (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == 'I' || token() == 'W' || token() == 'R'|| token() == 'O')
+        statement();
+    }
+    if (token() == 'T')
+      matching(token());
+    else
+      error("Expecting T ");
+  }
+
+  /*************************************************************************************** */
+
+  private void read() {
+    // R identifier {, identifier } ;
+    if (token() == 'R')
+      matching(token());
+    else
+      error("Expecting R ");
+    if (token() == 'X' || token() == 'Y' || token() == 'Z')
+      identifier();
+    else
+      error("Expecting identifier(X|Y|Z) ");
+    if (token() == ',') {
+      while (token() == ',') {
+        matching(token());
+        if (token() == 'X' || token() == 'Y' || token() == 'Z')
+          identifier();
+        else
+          error("Expecting identifier(X|Y|Z) ");
+      }
+    }
+    if (token() == ';')
+      matching(token());
+    else
+      error("Expecting ; ");
+  }
+
+  /********************************************************************************************* */
+  
+  private void output() {
+    // O identifier {, identifier } ;
+    if (token() == 'O')
+      matching(token());
+    else
+      error("Expecting O ");
+    if (token() == 'X' || token() == 'Y' || token() == 'Z')
+      identifier();
+    else
+      error("Expecting identifier(X|Y|Z) ");
+    if (token() == ',') {
+      while (token() == ',') {
+        matching(token());
+        if (token() == 'X' || token() == 'Y' || token() == 'Z')
+          identifier();
+        else
+          error("Expecting identifier(X|Y|Z) ");
+      }
+    }
+    if (token() == ';')
+      matching(token());
+    else
+      error("Expecting ; ");
+  }
+
+  /******************************************************************************************* */
+  
+  private void comparison(){
+    // comparison ::= ( oparand operator oparand )
+    if ((token() == 'X') || (token() == 'Y') || (token() == 'Z') ||(token() == '0') || (token() == '1') || (token() == '('))
+      oparand();
+    else
+      error("Not a valid oparand type ");
+    if ((token() == '<') || (token() == '=') || (token() == '>') || (token() == '!'))
+      operator();
+    if ((token() == 'X') || (token() == 'Y') || (token() == 'Z') ||(token() == '0') || (token() == '1') || (token() == '('))
+      oparand();
+    else
+      error("Not a valid oparand type ");
+  }
+
+  /**************************************************************************************************** */
+
+  private void expression(){
+    // expression ::= factor {+ factor}
+    if ((token() == 'X') || (token() == 'Y') || (token() == 'Z') ||
+        (token() == '0') || (token() == '1') || (token() == '('))
+      factor();
+    if (token() == '+'){
+      while (token() == '+'){
+        matching(token());
+        if ((token() == 'X') || (token() == 'Y') || (token() == 'Z') ||(token() == '0') || (token() == '1') || (token() == '('))
+          factor();
+        else
+          error("Not a valid factor type ");
+      }
+    }
+  }
+
+  /******************************************************************************************************* */
+
+  private void factor(){
+    // factor ::= oparand {* oparand}
+    if ((token() == 'X') || (token() == 'Y') || (token() == 'Z') ||(token() == '0') || (token() == '1') || (token() == '('))
+      oparand();
+    else
+      error("Not a valid oparand type ");
+    if (token() == '*'){
+      while (token() == '*') {
+        matching(token());
+        if ((token() == 'X') || (token() == 'Y') || (token() == 'Z') || (token() == '0') || (token() == '1') || (token() == '('))
+          oparand();
+        else
+          error("Not a valid oparand type ");
+      }
+    }
+  }
+
+  /******************************************************************************************************** */
+
+  private void oparand() {
+    // oparand ::= integer | identifier | ( expression )
+    if ((token() == '0') || (token() == '1'))
+      integer();
+    if (token() == 'X' || token() == 'Y' || token() == 'Z')
+      identifier();
+    if (token() == '(') {
+      matching(token());
+      expression();
+    }
+    if (token() == ')')
+      matching(token());
+  }
+
+  /*********************************************************************************************************** */
+  
+  private void operator() {
+    // operator ::= < | = | > | !
+
+    if ((token() == '<') || (token() == '=') || (token() == '>') || (token() == '!'))
+      matching(token());
+    else
+      error("Not a valid operator type ");
+  }
+
+  /****************************************************************************************************** */
+
+  private void identifier() {
+    // letter{char}
+    if (token() == 'X' || token() == 'Y' || token() == 'Z')
+      letter();
+    else if (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == '0' || token() == '1') {
+      while (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == '0' || token() == '1')
+        character();
+    }
+  }
+
+  /*************************************************************************************************** */
+  
+  private void character(){
+    // letter/digit
+    if ((token() == 'X') || (token() == 'Y') || (token() == 'Z'))
+      letter();
+    else if ((token() == '0') || (token() == '1'))
+      digit();
+  }
+
+  /***************************************************************************************************** */
+
+  private void integer() {
+    // integer ::= digit {digit}
+    if ((token() == '0') || (token() == '1')) {
+      while ((token() == '0') || (token() == '1'))
+        digit();
+    }
+  }
+  
+  /****************************************************************************************************** */
+
+private void letter() {
+  if ((token() == 'X') || (token() == 'Y') || (token() == 'Z'))
+    matching(token());
   else
-    charClass = EOF;
+    error("Not a valid letter type ");
 }
+  
+/******************************************************************************************************* */
 
-/******************************************************/
-/* getNonBlank - a function to call getChar until it
- returns a non-whitespace character */
-
-void getNonBlank(void)
-{
-  while (isspace(nextChar))
-    getChar();
+private void digit() {
+  if ((token() == '0') || (token() == '1'))
+    matching(token());
+  else
+    error("Not a valid digit type ");
 }
+  
+  /*******************************************************************************************************/
 
-bool logic = true;
-void isBool(){
-  if(logic != true){
-    logic == false;
+  private void start(){
+    program();
+    if (token() == '$')
+      matching('$');
+    else
+      error("Expecting $ at end");
+    if (errorFlag == 0)
+      System.out.println("legal." + "\n");
+    else
+      System.out.println("errors found." + "\n");
+
+  }
+
+  /*************************************************************************************************** */
+
+  public static void main(String[] args) throws IOException {
+    RDA rec = new RDA();
+    Scanner input = new Scanner(System.in);
+    System.out.print("\n" + "enter an expression: ");
+    String myString = input.nextLine();
+    rec.start();
+    System.out.println(myString);
+    input.close();
   }
 }
-
-bool isFloat(){
-  if(nextChar.contains(".")){
-    return true;
-  }
-}
-
-bool isDouble(){
-  if(nextChar.contains(".")){
-    return true;
-  }
-}
-
-bool isString(){
-  if(getChar(char ch) > 1){
-    return true;
-  }
-}
-
-bool isOctal(){
-  if(nextChar(int).startWith("0")){
-    return true;
-  }
-}
-
-/******************************************************/
-/* lex - a simple lexical analyzer for arithmetic
- expressions */
-
-int lex(void)
-{
-  lexLen = 0;
-  getNonBlank();
-  switch (charClass)
-  {
-    /* Identifiers */
-  case CHAR:
-    addChar();
-    getChar();
-    while (charClass == CHAR || charClass == INTEGER)
-    {
-      addChar();
-      getChar();
-    }
-    nextToken = INTEGER;
-    break;
-
-    /* Integer literals */
-  case INTEGER:
-    addChar();
-    getChar();
-    while (charClass == INTEGER)
-    {
-      addChar();
-      getChar();
-    }
-    nextToken = FLOAT;
-    break;
-
-
-    /* floating-point literals */
-  case FLOAT:
-    addChar();
-    getChar();
-    while (charClass == FLOAT)
-    {
-      addChar();
-      getChar();
-    }
-    nextToken = BOOL;
-    break;
-
-
-    /* boolean */
-  case BOOL:
-    addChar();
-    getChar();
-    while (charClass == BOOL)
-    {
-      addChar();
-      getChar();
-    }
-    nextToken = DOUBLE;
-    break;
-
-    /* double literals */
-  case DOUBLE:
-    addChar();
-    getChar();
-    while (charClass == DOUBLE)
-    {
-      addChar();
-      getChar();
-    }
-    nextToken = ARRAY;
-    break;
-
-    /* arrays */
-  case ARRAY:
-    addChar();
-    getChar();
-    while (charClass == ARRAY)
-    {
-      addChar();
-      getChar();
-    }
-    nextToken = HASH;
-    break;
-
-    /* hash */
-  case HASH:
-    addChar();
-    getChar();
-    while (charClass == HASH)
-    {
-      addChar();
-      getChar();
-    }
-    nextToken = MAP;
-    break;
-
-    /* map */
-  case MAP:
-    addChar();
-    getChar();
-    while (charClass == MAP)
-    {
-      addChar();
-      getChar();
-    }
-    nextToken = IDENT;
-    break;
-
-    /* identifier  */
-  case IDENT:
-    addChar();
-    getChar();
-    while (charClass == IDENT)
-    {
-      addChar();
-      getChar();
-    }
-    nextToken = INT_LIT;
-    break;
-
-    /* integer literal  */
-  case INT_LIT:
-    addChar();
-    getChar();
-    while (charClass == INT_LIT)
-    {
-      addChar();
-      getChar();
-    }
-    nextToken = STRING;
-    break;
-
-    /* string literals */
-  case STRING:
-    addChar();
-    getChar();
-    while (charClass == STRING)
-    {
-      addChar();
-      getChar();
-    }
-    nextToken = UNKNOWN;
-    break;
-
-    /* Parentheses and operators */
-  case UNKNOWN:
-    lookup(nextChar);
-    getChar();
-    break;
-    /* EOF */
-  case EOF:
-    nextToken = EOF;
-    lexeme[0] = 'E';
-    lexeme[1] = 'O';
-    lexeme[2] = 'F';
-    lexeme[3] = '\0';
-    break;
-  } /* End of switch */
-
-  printf("Next token is: %d, Next lexeme is %s\n",
-         nextToken, lexeme);
-  return nextToken;
-} /* End of function lex */
