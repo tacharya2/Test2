@@ -1,416 +1,106 @@
-import java.io.*;
-import java.util.Scanner;
+EBNF Rules for Java While Statement: 
+<while_stmt> → WHILE ‘(‘(<arith_expr> | <logic_expr>)’)’
+<block> <block> -> <stmt> | ‘{‘ <stmt > {<stmt>} ’}’
+RDA for Java WHILE:
 
-public class RDA {
+public class RDA_WHILE {
+    void while_stmt() {
+        if (nextToken != WHILE_CODE)
+            error();
+        else {
+            lex();
 
-  String myString;
-  int index = 0;
-  int errorFlag = 0;
-  private char token() {
-    return (myString.charAt(index));
-  }
+            if(extToken != COLON)
+                error();
+            else{
+                lex();
+            }
 
-  /***************************************************************************** */
+            if (nextToken != LEFT_PAREN)
+                error();
+            else {
+                lex();
 
-  private void pointer() {
-    if (index < (myString.length() - 1))
-      index++;
-  }
-  
-  /********************************************************************************** */
+                if(nextToken != COLON)
+                    error();
+                else{
+                    lex();
+                }
 
-  private void matching(char T) {
-    if (T == token())
-      pointer(); // else error();
-  }
-  
-  /****************************************************************************************** */
+                if (nextToken != LEFT_PAREN)
+                    error();
+                else {
+                    arith_expr();
+                    if (nextToken != LOG_OR) {
+                        error();
+                    else{
+                        logic_expr();
+                        }
+                    if(nextToken != RIGHT_PAREN)
+                        error();
+                    else{
+                        lex();
+                    }
 
-  private void error(String S) {
-    System.out.println("error at position: " + index);
-    System.out.println("\n" + S);
-    errorFlag = 1;
-    pointer();
-  }
+                    }
+                }
+            }
 
-  /****************************************************************************************** */
-
-  private void program(){
-    if (token() == 'P') {
-      matching(token());
-      if (token() == 'X' || token() == 'Y' || token() == 'Z'){
-        while (token() == 'X' || token() == 'Y' || token() == 'Z')
-        declare();
-      }
+        }
     }
-    else
-      error("Expecting P");
-    if (token() == 'B'){
-      matching(token());
-      if (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == 'I' || token() == 'W' || token() == 'R'|| token() == 'O') {
-
-        while (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == 'I' || token() == 'W' || token() == 'R'|| token() == 'O')
-          statement();
-      }
-    }
-    else
-      error("Expecting B");
-    if (token() == 'E')
-      matching('E');
-    else
-      error("Expecting E");
-    if (token() == ';')
-      matching(';');
-    else
-      error("Expecting ;");
-  }
-  
-  /****************************************************************************************************** */
-
-  private void declare(){
-    if (token() == 'X' || token() == 'Y' || token() == 'Z')
-      identifier();
-    else
-      error("Expecting identifier(X|Y|Z)");
-    if (token() == ','){
-      while (token() == ','){
-        matching(token());
-        if (token() == 'X' || token() == 'Y' || token() == 'Z')
-          identifier();
-        else
-          error("Expecting identifier(X|Y|Z)");
-      }
-    }
-    if (token() == ':')
-      matching(':');
-    else
-      error("Expecting : ");
-    if (token() == 'V')
-      matching('V');
-    else
-      error("Expecting V ");
-    if (token() == ';')
-      matching(';');
-    else
-      error("Expecting ; ");
-  }
-
-  /****************************************************************************/
-
-  private void statement() {
-    // statement ::= assignment | ifstmt | loop | read | output
-    if (token() == 'X' || token() == 'Y' || token() == 'Z')
-      assignment();
-    else if (token() == 'I')
-      ifstmt();
-    else if (token() == 'W')
-      loop();
-    else if (token() == 'R')
-      read();
-    else if (token() == 'O')
-      output();
-    else
-      error("Not a valid statement type");
-  }
-  
-  /********************************************************************************** */
-
-  private void assignment(){
-    // identifier~expression;
-    if ((token() == 'X') || (token() == 'Y') || (token() == 'Z'))
-      identifier();
-    else
-      error("Expecting identifier(X|Y|Z)");
-    if (token() == '~')
-      matching(token());
-    else
-      error("Expecting ~ ");
-    if ((token() == 'X') || (token() == 'Y') || (token() == 'Z') ||(token() == '0') || (token() == '1') || (token() == '('))
-      expression();
-    else
-      error("Expecting expression( X|Y|Z|0|1|( )");
-    if (token() == ';')
-      matching(token());
-    else
-      error("Expecting ; ");
-  }
-
-  /************************************** if Statement ***************************************** */
-
-  private void ifstmt() {
-    // I comparison @ {statement} [% {statement}] &
-    if (token() == 'I')
-      matching(token());
-    else
-      error("Expecting I ");
-    if (token() == '(') {
-      matching(token());
-      comparison();
-    } else
-      error("Expecting ( ");
-    if (token() == '@')
-      matching(token());
-    else
-      error("Expecting @ ");
-    if (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == 'I' || token() == 'W' || token() == 'R'
-        || token() == 'O') {
-      while (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == 'I' || token() == 'W' || token() == 'R'
-          || token() == 'O')
-        statement();
-    } else
-      error("Not a valid statement type");
-    if (token() == '%')
-      matching(token());
-    if (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == 'I' || token() == 'W' || token() == 'R'
-        || token() == 'O') {
-      while (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == 'I' || token() == 'W' || token() == 'R'
-          || token() == 'O')
-        statement();
-    }
-    if (token() == '&')
-      matching(token());
-    else
-      error("Expecting & ");
-  }
-
-  /***************************** While/for statement************************************* */
-
-  private void loop(){
-    // W comparison L {statement} T
-    if (token() == 'W')
-      matching(token());
-    else
-      error("Expecting w ");
-    if (token() == '('){
-      matching(token());
-      comparison();
-    }
-    else
-      error("Expecting ( ");
-    if (token() == 'L')
-      matching(token());
-    else
-      error("Expecting L ");
-
-    if (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == 'I' || token() == 'W' || token() == 'R' || token() == 'O')
-    {
-      while (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == 'I' || token() == 'W' || token() == 'R'|| token() == 'O')
-        statement();
-    }
-    if (token() == 'T')
-      matching(token());
-    else
-      error("Expecting T ");
-  }
-
-  /*************************************************************************************** */
-
-  private void read() {
-    // R identifier {, identifier } ;
-    if (token() == 'R')
-      matching(token());
-    else
-      error("Expecting R ");
-    if (token() == 'X' || token() == 'Y' || token() == 'Z')
-      identifier();
-    else
-      error("Expecting identifier(X|Y|Z) ");
-    if (token() == ',') {
-      while (token() == ',') {
-        matching(token());
-        if (token() == 'X' || token() == 'Y' || token() == 'Z')
-          identifier();
-        else
-          error("Expecting identifier(X|Y|Z) ");
-      }
-    }
-    if (token() == ';')
-      matching(token());
-    else
-      error("Expecting ; ");
-  }
-
-  /********************************************************************************************* */
-  
-  private void output() {
-    // O identifier {, identifier } ;
-    if (token() == 'O')
-      matching(token());
-    else
-      error("Expecting O ");
-    if (token() == 'X' || token() == 'Y' || token() == 'Z')
-      identifier();
-    else
-      error("Expecting identifier(X|Y|Z) ");
-    if (token() == ',') {
-      while (token() == ',') {
-        matching(token());
-        if (token() == 'X' || token() == 'Y' || token() == 'Z')
-          identifier();
-        else
-          error("Expecting identifier(X|Y|Z) ");
-      }
-    }
-    if (token() == ';')
-      matching(token());
-    else
-      error("Expecting ; ");
-  }
-
-  /******************************************************************************************* */
-  
-  private void comparison(){
-    // comparison ::= ( oparand operator oparand )
-    if ((token() == 'X') || (token() == 'Y') || (token() == 'Z') ||(token() == '0') || (token() == '1') || (token() == '('))
-      oparand();
-    else
-      error("Not a valid oparand type ");
-    if ((token() == '<') || (token() == '=') || (token() == '>') || (token() == '!'))
-      operator();
-    if ((token() == 'X') || (token() == 'Y') || (token() == 'Z') ||(token() == '0') || (token() == '1') || (token() == '('))
-      oparand();
-    else
-      error("Not a valid oparand type ");
-  }
-
-  /**************************************************************************************************** */
-
-  private void expression(){
-    // expression ::= factor {+ factor}
-    if ((token() == 'X') || (token() == 'Y') || (token() == 'Z') ||
-        (token() == '0') || (token() == '1') || (token() == '('))
-      factor();
-    if (token() == '+'){
-      while (token() == '+'){
-        matching(token());
-        if ((token() == 'X') || (token() == 'Y') || (token() == 'Z') ||(token() == '0') || (token() == '1') || (token() == '('))
-          factor();
-        else
-          error("Not a valid factor type ");
-      }
-    }
-  }
-
-  /******************************************************************************************************* */
-
-  private void factor(){
-    // factor ::= oparand {* oparand}
-    if ((token() == 'X') || (token() == 'Y') || (token() == 'Z') ||(token() == '0') || (token() == '1') || (token() == '('))
-      oparand();
-    else
-      error("Not a valid oparand type ");
-    if (token() == '*'){
-      while (token() == '*') {
-        matching(token());
-        if ((token() == 'X') || (token() == 'Y') || (token() == 'Z') || (token() == '0') || (token() == '1') || (token() == '('))
-          oparand();
-        else
-          error("Not a valid oparand type ");
-      }
-    }
-  }
-
-  /******************************************************************************************************** */
-
-  private void oparand() {
-    // oparand ::= integer | identifier | ( expression )
-    if ((token() == '0') || (token() == '1'))
-      integer();
-    if (token() == 'X' || token() == 'Y' || token() == 'Z')
-      identifier();
-    if (token() == '(') {
-      matching(token());
-      expression();
-    }
-    if (token() == ')')
-      matching(token());
-  }
-
-  /*********************************************************************************************************** */
-  
-  private void operator() {
-    // operator ::= < | = | > | !
-
-    if ((token() == '<') || (token() == '=') || (token() == '>') || (token() == '!'))
-      matching(token());
-    else
-      error("Not a valid operator type ");
-  }
-
-  /****************************************************************************************************** */
-
-  private void identifier() {
-    // letter{char}
-    if (token() == 'X' || token() == 'Y' || token() == 'Z')
-      letter();
-    else if (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == '0' || token() == '1') {
-      while (token() == 'X' || token() == 'Y' || token() == 'Z' || token() == '0' || token() == '1')
-        character();
-    }
-  }
-
-  /*************************************************************************************************** */
-  
-  private void character(){
-    // letter/digit
-    if ((token() == 'X') || (token() == 'Y') || (token() == 'Z'))
-      letter();
-    else if ((token() == '0') || (token() == '1'))
-      digit();
-  }
-
-  /***************************************************************************************************** */
-
-  private void integer() {
-    // integer ::= digit {digit}
-    if ((token() == '0') || (token() == '1')) {
-      while ((token() == '0') || (token() == '1'))
-        digit();
-    }
-  }
-  
-  /****************************************************************************************************** */
-
-private void letter() {
-  if ((token() == 'X') || (token() == 'Y') || (token() == 'Z'))
-    matching(token());
-  else
-    error("Not a valid letter type ");
 }
-  
-/******************************************************************************************************* */
 
-private void digit() {
-  if ((token() == '0') || (token() == '1'))
-    matching(token());
-  else
-    error("Not a valid digit type ");
+EBNF Rules for Java If Statement: 
+<ifstmt> → if (<boolexpr>) <statement> [else <statement>] 
+RDA for Java IF:
+void ifstmt() {
+    if (nextToken != IF_CODE)
+        error();
+    else {
+        lex();
+
+        if (nextToken != LEFT_PAREN)
+            error();
+        else {
+            boolexpr();
+
+            if (nextToken != RIGHT_PAREN)
+                error();
+            else {
+                statement();
+                if (nextToken == ELSE_CODE) {
+                    lex();
+                    statement();
+                }
+            }
+        }
+
+    }
 }
-  
-  /*******************************************************************************************************/
 
-  private void start(){
-    program();
-    if (token() == '$')
-      matching('$');
-    else
-      error("Expecting $ at end");
-    if (errorFlag == 0)
-      System.out.println("legal." + "\n");
-    else
-      System.out.println("errors found." + "\n");
+/*================================ifStatement========================================*/
+void ifstmt() {
+    if (nextToken != IF_CODE)
+        error();
+    else {
+        lex();
 
-  }
+        if (nextToken != LEFT_PAREN)
+            error();
+        else {
+            boolexpr();
 
-  /*************************************************************************************************** */
+            if (nextToken != RIGHT_PAREN)
+                error();
+            else {
+                statement();
+                if (nextToken == ELSE_CODE) {
+                    lex();
+                    statement();
+                }
+            }
+        }
 
-  public static void main(String[] args) throws IOException {
-    RDA rec = new RDA();
-    Scanner input = new Scanner(System.in);
-    System.out.print("\n" + "enter an expression: ");
-    String myString = input.nextLine();
-    rec.start();
-    System.out.println(myString);
-    input.close();
-  }
+    }
 }
+
